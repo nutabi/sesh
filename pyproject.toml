@@ -4,4 +4,13 @@ version = "0.1.0"
 description = "A simple session-tracking CLI application"
 readme = "README.md"
 requires-python = ">=3.13"
-dependencies = []
+dependencies = [
+    "click>=8.2.1",
+]
+
+[project.scripts]
+sesh = "sesh.cli:main"
+
+[build-system]
+requires = ["uv_build>=0.8.10,<0.9.0"]
+build-backend = "uv_build"
