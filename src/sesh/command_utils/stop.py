@@ -1,5 +1,5 @@
 import click
 
 
-def handle_stop():
+def handle_stop() -> None:
     click.echo("Stopping sesh")

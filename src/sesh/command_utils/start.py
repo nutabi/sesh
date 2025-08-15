@@ -17,7 +17,7 @@ class StartArg(click.ParamType):
         return value
 
 
-def handle_start(tags: list[Tag], description: tuple[str | Tag]):
+def handle_start(tags: list[Tag], description: tuple[str | Tag]) -> None:
     click.echo("with explicit tags: " + " ".join(map(lambda t: str(t), tags)))
     click.echo(
         "with inline tags: "
