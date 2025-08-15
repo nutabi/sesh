@@ -19,17 +19,14 @@ def main():
 @click.argument("description", nargs=-1, type=StartArg())
 def start(tags: list[Tag], description: tuple[str | Tag]):
     """Start a new session"""
-    click.echo("start sesh")
     handle_start(tags, description)
 
 
 @main.command()
 def stop():
     """Stop the current session"""
-    click.echo("stop sesh")
 
 
 @main.command()
 def status():
     """Show current session's status"""
-    click.echo("show sesh status")
