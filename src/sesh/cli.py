@@ -1,12 +1,10 @@
-# File: src/sesh/cli.py
-#
-# Description: This file contains the main CLI application. It handles
-# user input, processes it and passes it on to the appropriate handlers.
-
 import click
+
 
 from .command_utils.tag import TagOption, Tag
 from .command_utils.start import StartArg, handle_start
+from .command_utils.stop import handle_stop
+from .command_utils.status import handle_status
 
 
 @click.group()
@@ -19,15 +17,16 @@ def main():
 @click.argument("description", nargs=-1, type=StartArg())
 def start(tags: list[Tag], description: tuple[str | Tag]):
     """Start a new session"""
-    click.echo("start sesh")
     handle_start(tags, description)
 
 
-@main.command(help="Stop the current session")
+@main.command()
 def stop():
-    click.echo("stop sesh")
+    """Stop the current session"""
+    handle_stop()
 
 
-@main.command(help="Show current session's status")
+@main.command()
 def status():
-    click.echo("show sesh status")
+    """Show current session's status"""
+    handle_status()
