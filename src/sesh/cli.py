@@ -4,6 +4,7 @@ import click
 from .command_utils.tag import TagOption, Tag
 from .command_utils.start import StartArg, handle_start
 from .command_utils.stop import handle_stop
+from .command_utils.status import handle_status
 
 
 @click.group()
@@ -28,3 +29,4 @@ def stop():
 @main.command()
 def status():
     """Show current session's status"""
+    handle_status()
