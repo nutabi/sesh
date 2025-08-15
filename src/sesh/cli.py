@@ -1,8 +1,3 @@
-# File: src/sesh/cli.py
-#
-# Description: This file contains the main CLI application. It handles
-# user input, processes it and passes it on to the appropriate handlers.
-
 import click
 
 from .command_utils.tag import TagOption, Tag
