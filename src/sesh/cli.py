@@ -1,7 +1,9 @@
 import click
 
+
 from .command_utils.tag import TagOption, Tag
 from .command_utils.start import StartArg, handle_start
+from .command_utils.stop import handle_stop
 
 
 @click.group()
@@ -20,6 +22,7 @@ def start(tags: list[Tag], description: tuple[str | Tag]):
 @main.command()
 def stop():
     """Stop the current session"""
+    handle_stop()
 
 
 @main.command()
