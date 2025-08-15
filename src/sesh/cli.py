@@ -23,11 +23,13 @@ def start(tags: list[Tag], description: tuple[str | Tag]):
     handle_start(tags, description)
 
 
-@main.command(help="Stop the current session")
+@main.command()
 def stop():
+    """Stop the current session"""
     click.echo("stop sesh")
 
 
-@main.command(help="Show current session's status")
+@main.command()
 def status():
+    """Show current session's status"""
     click.echo("show sesh status")
