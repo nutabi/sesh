@@ -3,6 +3,8 @@ import json
 from pathlib import Path
 from whenever import Instant
 
+from sesh.error import InvalidSeshDataError
+
 
 @dataclass
 class CurrentSesh:
@@ -43,7 +45,7 @@ class CurrentManager:
 
         # Invalid session data
         if "title" not in data or "tags" not in data or "start_time" not in data:
-            raise ValueError("Invalid session data")
+            raise InvalidSeshDataError()
 
         return CurrentSesh(
             title=data["title"],
