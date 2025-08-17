@@ -17,6 +17,12 @@ class CurrentManager:
     def __init__(self, current_path: Path) -> None:
         self.current_path = current_path
 
+    def pop(self) -> None | CurrentSesh:
+        current_session = self.read()
+        if current_session is not None:
+            self.current_path.unlink()
+        return current_session
+
     def read(self) -> None | CurrentSesh:
         return json.load(
             self.current_path.open("r"), object_hook=CurrentManager.decode_session
