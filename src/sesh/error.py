@@ -6,9 +6,9 @@ class SeshError(Exception):
 
 
 class NoActiveSeshError(SeshError):
-    """Raised when there is no active Sesh session."""
+    """Raised when there is no active Sesh."""
 
-    def __init__(self, message: str = "No active session to stop."):
+    def __init__(self, message: str = "No active Sesh to stop."):
         super().__init__(message)
 
 

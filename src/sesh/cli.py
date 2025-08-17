@@ -16,17 +16,17 @@ def main():
 @click.option("-t", "--tag", "tags", type=TagOption(), help="Tags to be assigned")
 @click.argument("description", nargs=-1, type=StartArg())
 def start(tags: list[Tag], description: tuple[str | Tag]):
-    """Start a new session"""
+    """Start a new Sesh"""
     handle_start(tags, description)
 
 
 @main.command()
 def stop():
-    """Stop the current session"""
+    """Stop the current Sesh"""
     handle_stop()
 
 
 @main.command()
 def status():
-    """Show current session's status"""
+    """Show current Sesh's status"""
     handle_status()

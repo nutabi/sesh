@@ -45,11 +45,11 @@ class CurrentManager:
 
     @staticmethod
     def decode_session(data: dict) -> None | CurrentSesh:
-        # No active current session
+        # No active current Sesh
         if not data:
             return None
 
-        # Invalid session data
+        # Invalid Sesh data
         if "title" not in data or "tags" not in data or "start_time" not in data:
             raise InvalidSeshDataError()
 
