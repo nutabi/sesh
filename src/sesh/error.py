@@ -24,3 +24,10 @@ class SeshInProgressError(SeshError):
 
     def __init__(self, message: str = "A Sesh is already in progress."):
         super().__init__(message)
+
+
+class MigrationError(SeshError):
+    """Raised when a migration fails."""
+
+    def __init__(self, message: str = "Migration failed."):
+        super().__init__(message)
