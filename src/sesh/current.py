@@ -24,9 +24,19 @@ class CurrentManager:
         return current_session
 
     def read(self) -> None | CurrentSesh:
-        return json.load(
-            self.current_path.open("r"), object_hook=CurrentManager.decode_session
-        )
+        try:
+            with self.current_path.open("r") as f:
+                data = json.load(f)
+            
+            # Ensure the root object is a dict
+            if not isinstance(data, dict):
+                raise ValueError("Data must be a JSON object.")
+
+            return CurrentManager.decode_session(data)
+        except FileNotFoundError:
+            return None
+        except (json.JSONDecodeError, ValueError):
+            raise InvalidSeshDataError("Invalid session format.")
 
     def write(self, sesh: CurrentSesh) -> None:
         with self.current_path.open("w") as f:
@@ -34,9 +44,6 @@ class CurrentManager:
 
     @staticmethod
     def encode_session(obj: CurrentSesh) -> dict:
-        if not isinstance(obj, CurrentSesh):
-            raise TypeError("Expected CurrentSesh instance")
-
         return {
             "title": obj.title,
             "tags": obj.tags,
