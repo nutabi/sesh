@@ -1,10 +1,10 @@
 import click
 
 
-from .command_utils.tag import TagOption, Tag
-from .command_utils.start import StartArg, handle_start
-from .command_utils.stop import handle_stop
-from .command_utils.status import handle_status
+from sesh.tag import TagOption, Tag
+from sesh.command.start import StartArg, handle_start
+from sesh.command.stop import handle_stop
+from sesh.command.status import handle_status
 
 
 @click.group()

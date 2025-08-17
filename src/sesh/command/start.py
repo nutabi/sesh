@@ -1,5 +1,5 @@
 import click
-from .tag import Tag
+from sesh.tag import Tag
 
 
 class StartArg(click.ParamType):
