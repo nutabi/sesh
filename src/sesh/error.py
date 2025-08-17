@@ -17,3 +17,10 @@ class InvalidSeshDataError(SeshError):
 
     def __init__(self, message: str = "Invalid Sesh data."):
         super().__init__(message)
+
+
+class SeshInProgressError(SeshError):
+    """Raised when there is an ongoing Sesh."""
+
+    def __init__(self, message: str = "A Sesh is already in progress."):
+        super().__init__(message)
