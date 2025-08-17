@@ -4,12 +4,13 @@ from pathlib import Path
 from whenever import Instant
 
 from sesh.error import InvalidSeshDataError
+from sesh.tag import Tag
 
 
 @dataclass
 class CurrentSesh:
     title: str
-    tags: list[str]
+    tags: list[Tag]
     start_time: Instant
 
 
@@ -27,7 +28,7 @@ class CurrentManager:
         try:
             with self.current_path.open("r") as f:
                 data = json.load(f)
-            
+
             # Ensure the root object is a dict
             if not isinstance(data, dict):
                 raise ValueError("Data must be a JSON object.")
@@ -62,6 +63,6 @@ class CurrentManager:
 
         return CurrentSesh(
             title=data["title"],
-            tags=data["tags"],
+            tags=[Tag(name) for name in data["tags"]],
             start_time=Instant.parse_common_iso(data["start_time"]),
         )
