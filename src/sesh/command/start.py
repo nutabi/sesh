@@ -1,4 +1,5 @@
 import click
+from sesh.store import Store
 from sesh.tag import Tag
 
 
@@ -17,12 +18,12 @@ class StartArg(click.ParamType):
         return value
 
 
-def handle_start(tags: list[Tag], description: tuple[str | Tag]) -> None:
-    click.echo("with explicit tags: " + " ".join(map(lambda t: str(t), tags)))
-    click.echo(
-        "with inline tags: "
-        + " ".join(
-            map(lambda x: str(x), filter(lambda x: isinstance(x, Tag), description))
-        )
-    )
-    click.echo("with description: " + " ".join(map(lambda x: str(x), description)))
+def handle_start(store: Store, tags: list[Tag], arg: tuple[str | Tag]) -> None:
+    # combine tags
+    tags += [t for t in arg if isinstance(t, Tag)]
+
+    # make title
+    title = " ".join(map(str, arg))
+
+    # delegate work to store
+    store.start_sesh(title, tags)
