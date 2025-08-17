@@ -47,7 +47,7 @@ class CurrentManager:
     def encode_session(obj: CurrentSesh) -> dict:
         return {
             "title": obj.title,
-            "tags": obj.tags,
+            "tags": [str(t) for t in obj.tags],
             "start_time": obj.start_time.round().format_common_iso(),
         }
 
