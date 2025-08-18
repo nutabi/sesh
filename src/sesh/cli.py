@@ -41,12 +41,18 @@ def start(store: Store, tags: list[Tag], arg: tuple[str | Tag]):
 
 
 @main.command()
-def stop():
+@click.option(
+    "-t", "--tag", "tags", type=TagOption(), help="Tags to be assigned", default=[]
+)
+@click.argument("details", default="")
+@click.pass_obj
+def stop(store: Store, tags: list[Tag], details: str):
     """Stop the current Sesh"""
-    handle_stop()
+    handle_stop(store, tags, details)
 
 
 @main.command()
-def status():
+@click.pass_obj
+def status(store: Store):
     """Show current Sesh's status"""
-    handle_status()
+    handle_status(store)
