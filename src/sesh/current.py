@@ -4,7 +4,7 @@ from pathlib import Path
 from whenever import Instant
 
 from sesh.error import InvalidSeshDataError, SessionStorageError
-from sesh.tag import Tag
+from sesh.parser.tag import Tag
 
 
 @dataclass

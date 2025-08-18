@@ -9,7 +9,7 @@ from sesh.error import (
     SeshInProgressError,
 )
 from sesh.store import Store
-from sesh.tag import TagOption, Tag
+from sesh.parser.tag import TagOption, Tag
 from sesh.command.start import StartArg, handle_start
 from sesh.command.stop import handle_stop
 from sesh.command.status import handle_status

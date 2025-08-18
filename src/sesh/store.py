@@ -10,7 +10,7 @@ from sesh.error import (
     NoActiveSeshError,
     SeshInProgressError,
 )
-from sesh.tag import Tag
+from sesh.parser.tag import Tag
 
 
 DATA_SQLITE = "store.db"
