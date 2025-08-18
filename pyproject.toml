@@ -20,3 +20,32 @@ build-backend = "uv_build"
 dev = [
     "pytest>=8.4.1",
 ]
+
+[tool.ruff]
+line-length = 88
+indent-width = 4
+target-version = "py313"
+
+[tool.ruff.lint]
+select = [
+  "E", "F", "I",
+  "B",   # flake8-bugbear (extra correctness + bad patterns)
+  "UP",  # pyupgrade (modernize code, e.g., f-strings, 3.10+ syntax)
+  "SIM", # flake8-simplify (suggests simpler constructs)
+]
+ignore = []
+fixable = ["ALL"]
+unfixable = []
+
+[tool.ruff.lint.isort]
+known-first-party = ["sesh"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"
+docstring-code-format = false
+docstring-code-line-length = "dynamic"
+
+
