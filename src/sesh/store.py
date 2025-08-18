@@ -4,7 +4,12 @@ import sqlite3
 from whenever import Instant
 
 from sesh.current import CurrentManager, CurrentSesh
-from sesh.error import DatabaseError, MigrationError, NoActiveSeshError, SeshInProgressError
+from sesh.error import (
+    DatabaseError,
+    MigrationError,
+    NoActiveSeshError,
+    SeshInProgressError,
+)
 from sesh.tag import Tag
 
 
@@ -23,7 +28,7 @@ class Store:
             self.db_conn = sqlite3.connect(self.db_path)
         except sqlite3.Error as e:
             raise DatabaseError(f"Failed to connect to database: {e}")
-        
+
         self.current_manager = CurrentManager(self.current_path)
 
     def init_root(self, root: Path) -> None:
@@ -60,12 +65,18 @@ class Store:
                 db_conn.executescript(migration_sql)
                 db_conn.commit()
             except (OSError, IOError) as e:
-                raise MigrationError(f"Failed to read migration file {migration_file}: {e}")
+                raise MigrationError(
+                    f"Failed to read migration file {migration_file}: {e}"
+                )
             except sqlite3.Error as e:
-                raise MigrationError(f"Failed to execute migration script {migration_file}: {e}")
+                raise MigrationError(
+                    f"Failed to execute migration script {migration_file}: {e}"
+                )
             except Exception as e:
-                raise MigrationError(f"Unexpected error during migration {migration_file}: {e}")
-        
+                raise MigrationError(
+                    f"Unexpected error during migration {migration_file}: {e}"
+                )
+
         try:
             db_conn.close()
         except sqlite3.Error:
@@ -150,7 +161,7 @@ class Store:
             sesh_uid = result[0]
 
             return sesh_uid[:6]
-        
+
         except sqlite3.Error as e:
             raise DatabaseError(f"Database operation failed: {e}")
         except Exception as e:

@@ -36,5 +36,7 @@ def handle_status(store: Store) -> None:
         click.echo(f"Error: Failed to read session data ({e})", err=True)
         raise click.Abort()
     except Exception as e:
-        click.echo(f"Error: An unexpected error occurred while reading status ({e})", err=True)
+        click.echo(
+            f"Error: An unexpected error occurred while reading status ({e})", err=True
+        )
         raise click.Abort()
