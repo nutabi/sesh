@@ -1,6 +1,5 @@
-import contextlib
-import sqlite3
 from pathlib import Path
+import sqlite3
 
 from whenever import Instant
 
@@ -11,7 +10,8 @@ from sesh.error import (
     NoActiveSeshError,
     SeshInProgressError,
 )
-from sesh.parser.tag import Tag
+from sesh.tag import Tag
+
 
 DATA_SQLITE = "store.db"
 CURRENT_SESSION_JSON = "current.json"
@@ -27,7 +27,7 @@ class Store:
         try:
             self.db_conn = sqlite3.connect(self.db_path)
         except sqlite3.Error as e:
-            raise DatabaseError(f"Failed to connect to database: {e}") from e
+            raise DatabaseError(f"Failed to connect to database: {e}")
 
         self.current_manager = CurrentManager(self.current_path)
 
@@ -40,7 +40,7 @@ class Store:
         self.migrate()
 
     def migrate(self) -> None:
-        """Run all migration scripts in alphabetical order."""
+        """Run all migration scripts in alphabetical order from the migrations folder."""
         migrations_dir = Path.cwd() / "migrations"
 
         if not migrations_dir.exists():
@@ -53,34 +53,34 @@ class Store:
         try:
             db_conn = sqlite3.connect(self.db_path)
         except sqlite3.Error as e:
-            raise DatabaseError(
-                f"Failed to connect to database for migration: {e}"
-            ) from e
+            raise DatabaseError(f"Failed to connect to database for migration: {e}")
 
         # execute each migration file
         for migration_file in migration_files:
             try:
-                with open(migration_file) as f:
+                with open(migration_file, "r") as f:
                     migration_sql = f.read()
 
                 # Execute the migration SQL
                 db_conn.executescript(migration_sql)
                 db_conn.commit()
-            except OSError as e:
+            except (OSError, IOError) as e:
                 raise MigrationError(
                     f"Failed to read migration file {migration_file}: {e}"
-                ) from e
+                )
             except sqlite3.Error as e:
                 raise MigrationError(
                     f"Failed to execute migration script {migration_file}: {e}"
-                ) from e
+                )
             except Exception as e:
                 raise MigrationError(
                     f"Unexpected error during migration {migration_file}: {e}"
-                ) from e
+                )
 
-        with contextlib.suppress(sqlite3.Error):
+        try:
             db_conn.close()
+        except sqlite3.Error:
+            pass  # Ignore errors when closing connection
 
     def start_sesh(
         self,
@@ -128,8 +128,7 @@ class Store:
 
             # insert Sesh
             cur.execute(
-                "INSERT INTO sesh (title, details, start_time, end_time) "
-                "VALUES (?, ?, ?, ?)",
+                "INSERT INTO sesh (title, details, start_time, end_time) VALUES (?, ?, ?, ?)",
                 (
                     current_sesh.title,
                     details,
@@ -158,15 +157,15 @@ class Store:
             cur.execute("SELECT sesh_uid FROM sesh WHERE sesh_id = ?", (sesh_id,))
             result = cur.fetchone()
             if not result:
-                raise DatabaseError("Failed to fetch sesh UID") from None
+                raise DatabaseError("Failed to fetch sesh UID")
             sesh_uid = result[0]
 
             return sesh_uid[:6]
 
         except sqlite3.Error as e:
-            raise DatabaseError(f"Database operation failed: {e}") from e
+            raise DatabaseError(f"Database operation failed: {e}")
         except Exception as e:
-            raise DatabaseError(f"Unexpected error during session save: {e}") from e
+            raise DatabaseError(f"Unexpected error during session save: {e}")
 
     def reset_data(self) -> None:
         """Reset all session data by deleting all rows from the database tables."""
@@ -175,7 +174,7 @@ class Store:
             self.db_conn.execute("DELETE FROM tag")
             self.db_conn.commit()
         except sqlite3.Error as e:
-            raise DatabaseError(f"Failed to reset database: {e}") from e
+            raise DatabaseError(f"Failed to reset database: {e}")
 
     def load(self) -> None:
         pass

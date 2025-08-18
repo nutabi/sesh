@@ -94,5 +94,5 @@ class TagOption(click.ParamType):
                 tags.append(Tag(tag))
             except InvalidTagError:
                 # Use UsageError for cleaner error messages
-                raise click.UsageError(f"Invalid tag ({tag})") from None
+                raise click.UsageError(f"Invalid tag ({tag})")
         return tags

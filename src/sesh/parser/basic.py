@@ -1,2 +1,0 @@
-class BasicSeshQuery:
-    pass
