@@ -1,18 +1,20 @@
 from pathlib import Path
+
 import click
 
 from sesh.command.reset import handle_reset
+from sesh.command.start import StartArg, handle_start
+from sesh.command.status import handle_status
+from sesh.command.stop import handle_stop
 from sesh.error import (
     DatabaseError,
     MigrationError,
-    SessionStorageError,
     SeshInProgressError,
+    SessionStorageError,
 )
+from sesh.parser.basic import BasicSeshQuery
+from sesh.parser.tag import Tag, TagOption
 from sesh.store import Store
-from sesh.tag import TagOption, Tag
-from sesh.command.start import StartArg, handle_start
-from sesh.command.stop import handle_stop
-from sesh.command.status import handle_status
 
 
 @click.group()
@@ -34,12 +36,12 @@ def main(ctx):
         ctx.obj = Store(Path.cwd() / ".sesh")
     except (DatabaseError, MigrationError) as e:
         click.echo(f"Error: Failed to initialize store ({e})", err=True)
-        raise click.Abort()
+        raise click.Abort() from e
     except Exception as e:
         click.echo(
             f"Error: An unexpected error occurred during initialization ({e})", err=True
         )
-        raise click.Abort()
+        raise click.Abort() from e
 
 
 @main.command()
@@ -82,16 +84,16 @@ def start(store: Store, tags: list[Tag], arg: tuple[str | Tag]):
         click.echo("Sesh started successfully.")
     except SeshInProgressError as e:
         click.echo(f"Error: {e}", err=True)
-        raise click.Abort()
+        raise click.Abort() from e
     except DatabaseError as e:
         click.echo(f"Error: Database error while starting Sesh ({e})", err=True)
-        raise click.Abort()
+        raise click.Abort() from e
     except Exception as e:
         click.echo(
             f"Error: An unexpected error occurred while starting the Sesh ({e})",
             err=True,
         )
-        raise click.Abort()
+        raise click.Abort() from e
 
 
 @main.command()
@@ -192,10 +194,17 @@ def reset(store: Store, yes: bool):
         click.echo("Reset completed successfully.")
     except SessionStorageError as e:
         click.echo(f"Error: Failed to clear current session ({e})", err=True)
-        raise click.Abort()
+        raise click.Abort() from e
     except DatabaseError as e:
         click.echo(f"Error: Database error during reset ({e})", err=True)
-        raise click.Abort()
+        raise click.Abort() from e
     except Exception as e:
         click.echo(f"Error: An unexpected error occurred during reset ({e})", err=True)
-        raise click.Abort()
+        raise click.Abort() from e
+
+
+@main.command()
+@click.argument("query", type=BasicSeshQuery())
+@click.pass_obj
+def edit(store: Store, query: BasicSeshQuery):
+    pass

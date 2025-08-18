@@ -30,13 +30,14 @@ def handle_status(store: Store) -> None:
             click.echo(f"Tags: {', '.join(str(tag) for tag in current.tags)}")
             click.echo(f"Start time: {format_start_time(current.start_time)}")
             click.echo(
-                f"Elapsed time: {format_elapsed_time(Instant.now() - current.start_time)}"
+                "Elapsed time: "
+                f"{format_elapsed_time(Instant.now() - current.start_time)}"
             )
     except SessionStorageError as e:
         click.echo(f"Error: Failed to read session data ({e})", err=True)
-        raise click.Abort()
+        raise click.Abort() from e
     except Exception as e:
         click.echo(
             f"Error: An unexpected error occurred while reading status ({e})", err=True
         )
-        raise click.Abort()
+        raise click.Abort() from e
