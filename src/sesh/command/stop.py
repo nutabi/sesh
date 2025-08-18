@@ -2,7 +2,7 @@ import click
 
 from sesh.error import DatabaseError, NoActiveSeshError
 from sesh.store import Store
-from sesh.tag import Tag
+from sesh.parser.tag import Tag
 
 
 def handle_stop(store: Store, tags: list[Tag], details: str) -> None:
