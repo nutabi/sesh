@@ -1,18 +1,20 @@
 from pathlib import Path
+
 import click
 
 from sesh.command.reset import handle_reset
+from sesh.command.start import StartArg, handle_start
+from sesh.command.status import handle_status
+from sesh.command.stop import handle_stop
 from sesh.error import (
     DatabaseError,
     MigrationError,
-    SessionStorageError,
     SeshInProgressError,
+    SessionStorageError,
 )
+from sesh.parser.basic import BasicSeshQuery
+from sesh.parser.tag import Tag, TagOption
 from sesh.store import Store
-from sesh.parser.tag import TagOption, Tag
-from sesh.command.start import StartArg, handle_start
-from sesh.command.stop import handle_stop
-from sesh.command.status import handle_status
 
 
 @click.group()

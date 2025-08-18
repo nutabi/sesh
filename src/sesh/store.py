@@ -1,5 +1,5 @@
-from pathlib import Path
 import sqlite3
+from pathlib import Path
 
 from whenever import Instant
 
@@ -11,7 +11,6 @@ from sesh.error import (
     SeshInProgressError,
 )
 from sesh.parser.tag import Tag
-
 
 DATA_SQLITE = "store.db"
 CURRENT_SESSION_JSON = "current.json"
@@ -58,13 +57,13 @@ class Store:
         # execute each migration file
         for migration_file in migration_files:
             try:
-                with open(migration_file, "r") as f:
+                with open(migration_file) as f:
                     migration_sql = f.read()
 
                 # Execute the migration SQL
                 db_conn.executescript(migration_sql)
                 db_conn.commit()
-            except (OSError, IOError) as e:
+            except OSError as e:
                 raise MigrationError(
                     f"Failed to read migration file {migration_file}: {e}"
                 )

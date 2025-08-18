@@ -1,6 +1,7 @@
-from dataclasses import dataclass
 import json
+from dataclasses import dataclass
 from pathlib import Path
+
 from whenever import Instant
 
 from sesh.error import InvalidSeshDataError, SessionStorageError
@@ -23,7 +24,7 @@ class CurrentManager:
         if current_session is not None:
             try:
                 self.current_path.unlink()
-            except (OSError, IOError) as e:
+            except OSError as e:
                 raise SessionStorageError(f"Failed to remove session file: {e}")
         return current_session
 
@@ -39,7 +40,7 @@ class CurrentManager:
             return CurrentManager.decode_session(data)
         except FileNotFoundError:
             return None
-        except (OSError, IOError) as e:
+        except OSError as e:
             raise SessionStorageError(f"Failed to read session file: {e}")
         except json.JSONDecodeError as e:
             raise SessionStorageError(f"Invalid JSON in session file: {e}")
@@ -55,7 +56,7 @@ class CurrentManager:
         try:
             with self.current_path.open("w") as f:
                 json.dump(sesh, f, default=CurrentManager.encode_session)
-        except (OSError, IOError) as e:
+        except OSError as e:
             raise SessionStorageError(f"Failed to write session file: {e}")
         except (TypeError, ValueError) as e:
             raise SessionStorageError(f"Failed to serialize session data: {e}")
