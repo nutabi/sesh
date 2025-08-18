@@ -4,7 +4,7 @@ import sqlite3
 from whenever import Instant
 
 from sesh.current import CurrentManager, CurrentSesh
-from sesh.error import MigrationError, NoActiveSeshError, SeshInProgressError
+from sesh.error import DatabaseError, MigrationError, NoActiveSeshError, SeshInProgressError
 from sesh.tag import Tag
 
 
@@ -19,7 +19,11 @@ class Store:
 
         self.init_root(root)
 
-        self.db_conn = sqlite3.connect(self.db_path)
+        try:
+            self.db_conn = sqlite3.connect(self.db_path)
+        except sqlite3.Error as e:
+            raise DatabaseError(f"Failed to connect to database: {e}")
+        
         self.current_manager = CurrentManager(self.current_path)
 
     def init_root(self, root: Path) -> None:
@@ -41,7 +45,10 @@ class Store:
         migration_files = sorted(migrations_dir.glob("*.sql"))
 
         # open database connection
-        db_conn = sqlite3.connect(self.db_path)
+        try:
+            db_conn = sqlite3.connect(self.db_path)
+        except sqlite3.Error as e:
+            raise DatabaseError(f"Failed to connect to database for migration: {e}")
 
         # execute each migration file
         for migration_file in migration_files:
@@ -52,8 +59,17 @@ class Store:
                 # Execute the migration SQL
                 db_conn.executescript(migration_sql)
                 db_conn.commit()
-            except Exception:
-                raise MigrationError()
+            except (OSError, IOError) as e:
+                raise MigrationError(f"Failed to read migration file {migration_file}: {e}")
+            except sqlite3.Error as e:
+                raise MigrationError(f"Failed to execute migration script {migration_file}: {e}")
+            except Exception as e:
+                raise MigrationError(f"Unexpected error during migration {migration_file}: {e}")
+        
+        try:
+            db_conn.close()
+        except sqlite3.Error:
+            pass  # Ignore errors when closing connection
 
     def start_sesh(
         self,
@@ -81,58 +97,73 @@ class Store:
         # merge tags
         current_sesh.tags = list(set(tags).union(current_sesh.tags))
 
-        # insert tags and get tag ids
-        cur = self.db_conn.cursor()
-        tag_ids = []
-        if current_sesh.tags:  # Only insert tags if the list is not empty
-            cur.executemany(
-                "INSERT OR IGNORE INTO tag (tag_name) VALUES (?)",
-                [(str(tag),) for tag in current_sesh.tags],
-            )
+        try:
+            # insert tags and get tag ids
+            cur = self.db_conn.cursor()
+            tag_ids = []
+            if current_sesh.tags:  # Only insert tags if the list is not empty
+                cur.executemany(
+                    "INSERT OR IGNORE INTO tag (tag_name) VALUES (?)",
+                    [(str(tag),) for tag in current_sesh.tags],
+                )
+                cur.execute(
+                    "SELECT tag_id FROM tag WHERE tag_name IN ({})".format(
+                        ",".join("?" * len(current_sesh.tags))
+                    ),
+                    [str(tag) for tag in current_sesh.tags],
+                )
+                tag_ids = [row[0] for row in cur.fetchall()]
+                self.db_conn.commit()
+
+            # insert Sesh
             cur.execute(
-                "SELECT tag_id FROM tag WHERE tag_name IN ({})".format(
-                    ",".join("?" * len(current_sesh.tags))
+                "INSERT INTO sesh (title, details, start_time, end_time) VALUES (?, ?, ?, ?)",
+                (
+                    current_sesh.title,
+                    details,
+                    current_sesh.start_time.round().format_common_iso(),
+                    Instant.now().round().format_common_iso(),
                 ),
-                [str(tag) for tag in current_sesh.tags],
-            )
-            tag_ids = [row[0] for row in cur.fetchall()]
-            self.db_conn.commit()
-
-        # insert Sesh
-        cur.execute(
-            "INSERT INTO sesh (title, details, start_time, end_time) VALUES (?, ?, ?, ?)",
-            (
-                current_sesh.title,
-                details,
-                current_sesh.start_time.round().format_common_iso(),
-                Instant.now().round().format_common_iso(),
-            ),
-        )
-        self.db_conn.commit()
-
-        # get sesh id
-        cur.execute("SELECT last_insert_rowid()")
-        result = cur.fetchone()
-        if not result:
-            raise RuntimeError("Failed to get sesh ID after insertion")
-        sesh_id = result[0]
-
-        # insert sesh-tag relationships
-        if tag_ids:  # Only insert relationships if we have tag IDs
-            cur.executemany(
-                "INSERT INTO sesh_tag (sesh_id, tag_id) VALUES (?, ?)",
-                [(sesh_id, tag_id) for tag_id in tag_ids],
             )
             self.db_conn.commit()
 
-        # fetch sesh uid
-        cur.execute("SELECT sesh_uid FROM sesh WHERE sesh_id = ?", (sesh_id,))
-        result = cur.fetchone()
-        if not result:
-            raise RuntimeError("Failed to fetch sesh UID")
-        sesh_uid = result[0]
+            # get sesh id
+            cur.execute("SELECT last_insert_rowid()")
+            result = cur.fetchone()
+            if not result:
+                raise DatabaseError("Failed to get sesh ID after insertion")
+            sesh_id = result[0]
 
-        return sesh_uid[:6]
+            # insert sesh-tag relationships
+            if tag_ids:  # Only insert relationships if we have tag IDs
+                cur.executemany(
+                    "INSERT INTO sesh_tag (sesh_id, tag_id) VALUES (?, ?)",
+                    [(sesh_id, tag_id) for tag_id in tag_ids],
+                )
+                self.db_conn.commit()
+
+            # fetch sesh uid
+            cur.execute("SELECT sesh_uid FROM sesh WHERE sesh_id = ?", (sesh_id,))
+            result = cur.fetchone()
+            if not result:
+                raise DatabaseError("Failed to fetch sesh UID")
+            sesh_uid = result[0]
+
+            return sesh_uid[:6]
+        
+        except sqlite3.Error as e:
+            raise DatabaseError(f"Database operation failed: {e}")
+        except Exception as e:
+            raise DatabaseError(f"Unexpected error during session save: {e}")
+
+    def reset_data(self) -> None:
+        """Reset all session data by deleting all rows from the database tables."""
+        try:
+            self.db_conn.execute("DELETE FROM sesh")
+            self.db_conn.execute("DELETE FROM tag")
+            self.db_conn.commit()
+        except sqlite3.Error as e:
+            raise DatabaseError(f"Failed to reset database: {e}")
 
     def load(self) -> None:
         pass
