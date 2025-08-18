@@ -1,7 +1,8 @@
 import click
-from sesh.error import DatabaseError, SessionStorageError, SeshInProgressError
-from sesh.store import Store
+
+from sesh.error import DatabaseError, SeshInProgressError, SessionStorageError
 from sesh.parser.tag import Tag
+from sesh.store import Store
 
 
 class StartArg(click.ParamType):
