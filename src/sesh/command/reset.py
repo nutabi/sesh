@@ -1,11 +1,9 @@
 from sesh.store import Store
 
 
-def handle_reset(store: Store):
-    # clear current sesh
+def handle_reset(store: Store) -> None:
+    # clear current sesh - will raise SessionStorageError if it fails
     store.current_manager.pop()
 
-    # delete data rows
-    store.db_conn.execute("DELETE FROM sesh")
-    store.db_conn.execute("DELETE FROM tag")
-    store.db_conn.commit()
+    # delete data rows - will raise DatabaseError if it fails
+    store.reset_data()
