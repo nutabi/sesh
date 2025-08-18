@@ -1,9 +1,8 @@
-import click
 import pytest
+import click
 from click.testing import CliRunner
-
 from sesh.error import InvalidTagError
-from sesh.parser.tag import Tag, TagOption
+from sesh.tag import Tag, TagOption
 
 
 class TestTag:

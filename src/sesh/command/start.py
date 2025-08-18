@@ -1,8 +1,7 @@
 import click
-
-from sesh.error import DatabaseError, SeshInProgressError, SessionStorageError
-from sesh.parser.tag import Tag
+from sesh.error import DatabaseError, SessionStorageError, SeshInProgressError
 from sesh.store import Store
+from sesh.tag import Tag
 
 
 class StartArg(click.ParamType):
@@ -39,4 +38,4 @@ def handle_start(store: Store, tags: list[Tag], arg: tuple[str | Tag]) -> None:
         raise
     except Exception as e:
         # Convert any unexpected errors to DatabaseError for consistency
-        raise DatabaseError(f"Failed to start session: {e}") from e
+        raise DatabaseError(f"Failed to start session: {e}")
