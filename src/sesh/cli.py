@@ -2,6 +2,7 @@ from pathlib import Path
 import click
 
 
+from sesh.command.reset import handle_reset
 from sesh.store import Store
 from sesh.tag import TagOption, Tag
 from sesh.command.start import StartArg, handle_start
@@ -56,3 +57,14 @@ def stop(store: Store, tags: list[Tag], details: str):
 def status(store: Store):
     """Show current Sesh's status"""
     handle_status(store)
+
+
+@main.command()
+@click.option("--yes", "-y", is_flag=True, help="Confirm reset", prompt=True)
+@click.pass_obj
+def reset(store: Store, yes: bool):
+    """Reset the current Sesh"""
+    if not yes:
+        click.echo("Reset cancelled.")
+        return
+    handle_reset(store)
