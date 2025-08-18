@@ -39,4 +39,4 @@ def handle_start(store: Store, tags: list[Tag], arg: tuple[str | Tag]) -> None:
         raise
     except Exception as e:
         # Convert any unexpected errors to DatabaseError for consistency
-        raise DatabaseError(f"Failed to start session: {e}")
+        raise DatabaseError(f"Failed to start session: {e}") from e
