@@ -31,3 +31,35 @@ class MigrationError(SeshError):
 
     def __init__(self, message: str = "Migration failed."):
         super().__init__(message)
+
+
+class DatabaseError(SeshError):
+    """Raised when a database operation fails."""
+
+    def __init__(self, message: str = "Database operation failed."):
+        super().__init__(message)
+
+
+class InvalidTagError(SeshError):
+    """Raised when a tag name is invalid."""
+
+    def __init__(self, tag_name: str = "", message: str = ""):
+        if not message and tag_name:
+            message = f"Invalid tag: {tag_name}"
+        elif not message:
+            message = "Invalid tag provided."
+        super().__init__(message)
+
+
+class SessionStorageError(SeshError):
+    """Raised when session file storage operations fail."""
+
+    def __init__(self, message: str = "Session storage operation failed."):
+        super().__init__(message)
+
+
+class InvalidArgumentError(SeshError):
+    """Raised when command arguments are invalid."""
+
+    def __init__(self, message: str = "Invalid command argument."):
+        super().__init__(message)
