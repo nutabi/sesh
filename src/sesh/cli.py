@@ -199,3 +199,10 @@ def reset(store: Store, yes: bool):
     except Exception as e:
         click.echo(f"Error: An unexpected error occurred during reset ({e})", err=True)
         raise click.Abort()
+
+
+@main.command()
+@click.argument("query", type=BasicSeshQuery())
+@click.pass_obj
+def edit(store: Store, query: BasicSeshQuery):
+    pass
