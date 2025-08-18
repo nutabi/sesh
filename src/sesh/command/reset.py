@@ -1,5 +1,3 @@
-import click
-
 from sesh.store import Store
 
 
