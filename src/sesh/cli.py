@@ -1,8 +1,8 @@
 from pathlib import Path
 import click
 
-
 from sesh.command.reset import handle_reset
+from sesh.error import DatabaseError, MigrationError, SessionStorageError, SeshInProgressError
 from sesh.store import Store
 from sesh.tag import TagOption, Tag
 from sesh.command.start import StartArg, handle_start
@@ -13,8 +13,14 @@ from sesh.command.status import handle_status
 @click.group()
 @click.pass_context
 def main(ctx):
-    ctx.obj = Store(Path.cwd() / ".sesh")
-    pass
+    try:
+        ctx.obj = Store(Path.cwd() / ".sesh")
+    except (DatabaseError, MigrationError) as e:
+        click.echo(f"Error: Failed to initialize store ({e})", err=True)
+        raise click.Abort()
+    except Exception as e:
+        click.echo(f"Error: An unexpected error occurred during initialization ({e})", err=True)
+        raise click.Abort()
 
 
 @main.command()
@@ -35,10 +41,21 @@ def start(store: Store, tags: list[Tag], arg: tuple[str | Tag]):
     """
     # check that arg is non-empty
     if not arg:
-        click.echo("Error: No argument provided.", err=True)
-        return
+        click.echo("Error: No argument provided for start command.", err=True)
+        raise click.Abort()
 
-    handle_start(store, tags, arg)
+    try:
+        handle_start(store, tags, arg)
+        click.echo("Sesh started successfully.")
+    except SeshInProgressError as e:
+        click.echo(f"Error: {e}", err=True)
+        raise click.Abort()
+    except DatabaseError as e:
+        click.echo(f"Error: Database error while starting Sesh ({e})", err=True)
+        raise click.Abort()
+    except Exception as e:
+        click.echo(f"Error: An unexpected error occurred while starting the Sesh ({e})", err=True)
+        raise click.Abort()
 
 
 @main.command()
@@ -67,4 +84,16 @@ def reset(store: Store, yes: bool):
     if not yes:
         click.echo("Reset cancelled.")
         return
-    handle_reset(store)
+    
+    try:
+        handle_reset(store)
+        click.echo("Reset completed successfully.")
+    except SessionStorageError as e:
+        click.echo(f"Error: Failed to clear current session ({e})", err=True)
+        raise click.Abort()
+    except DatabaseError as e:
+        click.echo(f"Error: Database error during reset ({e})", err=True)
+        raise click.Abort()
+    except Exception as e:
+        click.echo(f"Error: An unexpected error occurred during reset ({e})", err=True)
+        raise click.Abort()

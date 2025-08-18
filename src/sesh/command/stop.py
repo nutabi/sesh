@@ -1,6 +1,6 @@
 import click
 
-from sesh.error import NoActiveSeshError
+from sesh.error import DatabaseError, NoActiveSeshError
 from sesh.store import Store
 from sesh.tag import Tag
 
@@ -11,6 +11,11 @@ def handle_stop(store: Store, tags: list[Tag], details: str) -> None:
         uid = store.end_sesh(details, tags)
         click.echo(f"Sesh stopped successfully ({uid})")
     except NoActiveSeshError:
-        click.echo("Error: No active Sesh to stop.", err=True)
+        click.echo("Error: No active Sesh to stop", err=True)
+        raise click.Abort()
+    except DatabaseError as e:
+        click.echo(f"Error: Database error while stopping Sesh ({e})", err=True)
+        raise click.Abort()
     except Exception as e:
-        click.echo(f"An error occurred while stopping the Sesh: {e}", err=True)
+        click.echo(f"Error: An unexpected error occurred while stopping the Sesh ({e})", err=True)
+        raise click.Abort()
