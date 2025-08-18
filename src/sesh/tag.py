@@ -1,5 +1,7 @@
 import click
 
+from sesh.error import InvalidTagError
+
 
 class Tag:
     """A validated tag with display name generation.
@@ -12,7 +14,7 @@ class Tag:
     for better readability in user interfaces.
 
     Raises:
-        ValueError: If the tag name doesn't meet validation requirements.
+        InvalidTagError: If the tag name doesn't meet validation requirements.
 
     Examples:
         >>> tag = Tag("machine-learning")
@@ -26,7 +28,7 @@ class Tag:
         if Tag.validate_tag_name(name):
             self.name = name
         else:
-            raise ValueError(f"Invalid tag: {name}")
+            raise InvalidTagError(name)
 
         if display_name is None:
             self.display_name = Tag.make_display_name(name)
@@ -90,6 +92,7 @@ class TagOption(click.ParamType):
                 continue
             try:
                 tags.append(Tag(tag))
-            except ValueError:
-                self.fail(f"{tag} is not a valid tag", param, ctx)
+            except InvalidTagError:
+                # Use UsageError for cleaner error messages
+                raise click.UsageError(f"Invalid tag ({tag})")
         return tags

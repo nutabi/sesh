@@ -1,4 +1,5 @@
 import click
+from sesh.error import DatabaseError, SessionStorageError, SeshInProgressError
 from sesh.store import Store
 from sesh.tag import Tag
 
@@ -13,17 +14,28 @@ class StartArg(click.ParamType):
         if value.startswith("+"):
             if Tag.validate_tag_name(value[1:]):
                 return Tag(value[1:])
-            self.fail(f"Invalid tag: {value}")
+            # Use UsageError for cleaner error messages
+            raise click.UsageError(f"Invalid inline tag ({value[1:]})")
 
         return value
 
 
 def handle_start(store: Store, tags: list[Tag], arg: tuple[str | Tag]) -> None:
-    # combine tags
-    tags += [t for t in arg if isinstance(t, Tag)]
+    try:
+        # combine tags
+        tags += [t for t in arg if isinstance(t, Tag)]
 
-    # make title
-    title = " ".join(map(str, arg))
+        # make title
+        title = " ".join(map(str, arg))
 
-    # delegate work to store
-    store.start_sesh(title, tags)
+        # delegate work to store
+        store.start_sesh(title, tags)
+    except SeshInProgressError:
+        # Re-raise this specific error to be handled by CLI
+        raise
+    except (DatabaseError, SessionStorageError):
+        # Re-raise these errors to be handled by CLI
+        raise
+    except Exception as e:
+        # Convert any unexpected errors to DatabaseError for consistency
+        raise DatabaseError(f"Failed to start session: {e}")

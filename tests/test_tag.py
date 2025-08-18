@@ -1,6 +1,7 @@
 import pytest
 import click
 from click.testing import CliRunner
+from sesh.error import InvalidTagError
 from sesh.tag import Tag, TagOption
 
 
@@ -48,38 +49,38 @@ class TestTag:
         assert repr(tag) == "web dev"
 
     def test_invalid_tag_empty_string(self):
-        """Test that empty string raises ValueError."""
-        with pytest.raises(ValueError, match="Invalid tag: "):
+        """Test that empty string raises InvalidTagError."""
+        with pytest.raises(InvalidTagError, match="Invalid tag provided"):
             Tag("")
 
     def test_invalid_tag_starts_with_hyphen(self):
-        """Test that tag starting with hyphen raises ValueError."""
-        with pytest.raises(ValueError, match="Invalid tag: -python"):
+        """Test that tag starting with hyphen raises InvalidTagError."""
+        with pytest.raises(InvalidTagError, match="Invalid tag: -python"):
             Tag("-python")
 
     def test_invalid_tag_ends_with_hyphen(self):
-        """Test that tag ending with hyphen raises ValueError."""
-        with pytest.raises(ValueError, match="Invalid tag: python-"):
+        """Test that tag ending with hyphen raises InvalidTagError."""
+        with pytest.raises(InvalidTagError, match="Invalid tag: python-"):
             Tag("python-")
 
     def test_invalid_tag_uppercase_letters(self):
-        """Test that uppercase letters raise ValueError."""
-        with pytest.raises(ValueError, match="Invalid tag: Python"):
+        """Test that uppercase letters raise InvalidTagError."""
+        with pytest.raises(InvalidTagError, match="Invalid tag: Python"):
             Tag("Python")
 
     def test_invalid_tag_special_characters(self):
-        """Test that special characters raise ValueError."""
-        with pytest.raises(ValueError, match="Invalid tag: python!"):
+        """Test that special characters raise InvalidTagError."""
+        with pytest.raises(InvalidTagError, match="Invalid tag: python!"):
             Tag("python!")
 
     def test_invalid_tag_underscore(self):
-        """Test that underscores raise ValueError."""
-        with pytest.raises(ValueError, match="Invalid tag: python_web"):
+        """Test that underscores raise InvalidTagError."""
+        with pytest.raises(InvalidTagError, match="Invalid tag: python_web"):
             Tag("python_web")
 
     def test_invalid_tag_spaces(self):
-        """Test that spaces raise ValueError."""
-        with pytest.raises(ValueError, match="Invalid tag: web dev"):
+        """Test that spaces raise InvalidTagError."""
+        with pytest.raises(InvalidTagError, match="Invalid tag: web dev"):
             Tag("web dev")
 
     def test_validate_tag_name_valid_cases(self):
@@ -164,7 +165,7 @@ class TestTagOption:
         runner = CliRunner()
         result = runner.invoke(test_cmd, ["--tags", "invalid-tag-"])
         assert result.exit_code != 0
-        assert "invalid-tag- is not a valid tag" in result.output
+        assert "Invalid tag (invalid-tag-)" in result.output
 
     def test_empty_tag_skipped(self):
         """Test that empty tags are skipped gracefully."""
@@ -232,4 +233,4 @@ class TestTagOptionIntegration:
         result = runner.invoke(test_command, ["--tags", "python,invalid-tag-"])
 
         assert result.exit_code != 0
-        assert "invalid-tag- is not a valid tag" in result.output
+        assert "Invalid tag (invalid-tag-)" in result.output

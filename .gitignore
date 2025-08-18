@@ -12,3 +12,6 @@ wheels/
 # Development artifacts
 .sesh
 .env
+
+# VSCode settings
+.vscode/

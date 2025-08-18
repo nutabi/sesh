@@ -1,6 +1,7 @@
 import click
 from whenever import Instant, TimeDelta
 
+from sesh.error import SessionStorageError
 from sesh.store import Store
 
 
@@ -20,13 +21,20 @@ def format_elapsed_time(duration: TimeDelta) -> str:
 
 
 def handle_status(store: Store) -> None:
-    current = store.current_manager.read()
-    if current is None:
-        click.echo("No active Sesh")
-    else:
-        click.echo(f"Active Sesh: {current.title}")
-        click.echo(f"Tags: {', '.join(str(tag) for tag in current.tags)}")
-        click.echo(f"Start time: {format_start_time(current.start_time)}")
-        click.echo(
-            f"Elapsed time: {format_elapsed_time(Instant.now() - current.start_time)}"
-        )
+    try:
+        current = store.current_manager.read()
+        if current is None:
+            click.echo("No active Sesh")
+        else:
+            click.echo(f"Active Sesh: {current.title}")
+            click.echo(f"Tags: {', '.join(str(tag) for tag in current.tags)}")
+            click.echo(f"Start time: {format_start_time(current.start_time)}")
+            click.echo(
+                f"Elapsed time: {format_elapsed_time(Instant.now() - current.start_time)}"
+            )
+    except SessionStorageError as e:
+        click.echo(f"Error: Failed to read session data ({e})", err=True)
+        raise click.Abort()
+    except Exception as e:
+        click.echo(f"Error: An unexpected error occurred while reading status ({e})", err=True)
+        raise click.Abort()
