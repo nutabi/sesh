@@ -12,6 +12,3 @@ wheels/
 # Development artifacts
 .sesh
 .env
-.env.*
-local.*
-*.local.*
