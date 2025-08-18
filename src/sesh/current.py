@@ -1,10 +1,11 @@
-from dataclasses import dataclass
 import json
+from dataclasses import dataclass
 from pathlib import Path
+
 from whenever import Instant
 
 from sesh.error import InvalidSeshDataError, SessionStorageError
-from sesh.tag import Tag
+from sesh.parser.tag import Tag
 
 
 @dataclass
@@ -23,8 +24,8 @@ class CurrentManager:
         if current_session is not None:
             try:
                 self.current_path.unlink()
-            except (OSError, IOError) as e:
-                raise SessionStorageError(f"Failed to remove session file: {e}")
+            except OSError as e:
+                raise SessionStorageError(f"Failed to remove session file: {e}") from e
         return current_session
 
     def read(self) -> None | CurrentSesh:
@@ -39,26 +40,28 @@ class CurrentManager:
             return CurrentManager.decode_session(data)
         except FileNotFoundError:
             return None
-        except (OSError, IOError) as e:
-            raise SessionStorageError(f"Failed to read session file: {e}")
+        except OSError as e:
+            raise SessionStorageError(f"Failed to read session file: {e}") from e
         except json.JSONDecodeError as e:
-            raise SessionStorageError(f"Invalid JSON in session file: {e}")
+            raise SessionStorageError(f"Invalid JSON in session file: {e}") from e
         except ValueError as e:
-            raise SessionStorageError(f"Invalid session file format: {e}")
+            raise SessionStorageError(f"Invalid session file format: {e}") from e
         except InvalidSeshDataError:
             # Re-raise this specific error
             raise
         except Exception as e:
-            raise SessionStorageError(f"Unexpected error reading session file: {e}")
+            raise SessionStorageError(
+                f"Unexpected error reading session file: {e}"
+            ) from e
 
     def write(self, sesh: CurrentSesh) -> None:
         try:
             with self.current_path.open("w") as f:
                 json.dump(sesh, f, default=CurrentManager.encode_session)
-        except (OSError, IOError) as e:
-            raise SessionStorageError(f"Failed to write session file: {e}")
+        except OSError as e:
+            raise SessionStorageError(f"Failed to write session file: {e}") from e
         except (TypeError, ValueError) as e:
-            raise SessionStorageError(f"Failed to serialize session data: {e}")
+            raise SessionStorageError(f"Failed to serialize session data: {e}") from e
 
     @staticmethod
     def encode_session(obj: CurrentSesh) -> dict:
