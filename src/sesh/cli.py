@@ -2,7 +2,12 @@ from pathlib import Path
 import click
 
 from sesh.command.reset import handle_reset
-from sesh.error import DatabaseError, MigrationError, SessionStorageError, SeshInProgressError
+from sesh.error import (
+    DatabaseError,
+    MigrationError,
+    SessionStorageError,
+    SeshInProgressError,
+)
 from sesh.store import Store
 from sesh.tag import TagOption, Tag
 from sesh.command.start import StartArg, handle_start
@@ -31,15 +36,20 @@ def main(ctx):
         click.echo(f"Error: Failed to initialize store ({e})", err=True)
         raise click.Abort()
     except Exception as e:
-        click.echo(f"Error: An unexpected error occurred during initialization ({e})", err=True)
+        click.echo(
+            f"Error: An unexpected error occurred during initialization ({e})", err=True
+        )
         raise click.Abort()
 
 
 @main.command()
 @click.option(
-    "-t", "--tag", "tags", type=TagOption(), 
-    help="Additional tags to assign (comma-separated)", 
-    default=[]
+    "-t",
+    "--tag",
+    "tags",
+    type=TagOption(),
+    help="Additional tags to assign (comma-separated)",
+    default=[],
 )
 @click.argument("arg", nargs=-1, type=StartArg())
 @click.pass_obj
@@ -55,7 +65,7 @@ def start(store: Store, tags: list[Tag], arg: tuple[str | Tag]):
     \b
     Examples:
         sesh start working on documentation
-        sesh start fix +bug in authentication system  
+        sesh start fix +bug in authentication system
         sesh start +python +web-dev building new API
         sesh start -t urgent,review code review session
 
@@ -77,15 +87,21 @@ def start(store: Store, tags: list[Tag], arg: tuple[str | Tag]):
         click.echo(f"Error: Database error while starting Sesh ({e})", err=True)
         raise click.Abort()
     except Exception as e:
-        click.echo(f"Error: An unexpected error occurred while starting the Sesh ({e})", err=True)
+        click.echo(
+            f"Error: An unexpected error occurred while starting the Sesh ({e})",
+            err=True,
+        )
         raise click.Abort()
 
 
 @main.command()
 @click.option(
-    "-t", "--tag", "tags", type=TagOption(), 
-    help="Additional tags to add when stopping (comma-separated)", 
-    default=[]
+    "-t",
+    "--tag",
+    "tags",
+    type=TagOption(),
+    help="Additional tags to add when stopping (comma-separated)",
+    default=[],
 )
 @click.argument("details", default="")
 @click.pass_obj
@@ -138,7 +154,13 @@ def status(store: Store):
 
 
 @main.command()
-@click.option("--yes", "-y", is_flag=True, help="Skip confirmation prompt", prompt="Are you sure you want to reset all data?")
+@click.option(
+    "--yes",
+    "-y",
+    is_flag=True,
+    help="Skip confirmation prompt",
+    prompt="Are you sure you want to reset all data?",
+)
 @click.pass_obj
 def reset(store: Store, yes: bool):
     """Reset all session data and clear current session.
@@ -164,7 +186,7 @@ def reset(store: Store, yes: bool):
     if not yes:
         click.echo("Reset cancelled.")
         return
-    
+
     try:
         handle_reset(store)
         click.echo("Reset completed successfully.")

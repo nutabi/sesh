@@ -17,5 +17,8 @@ def handle_stop(store: Store, tags: list[Tag], details: str) -> None:
         click.echo(f"Error: Database error while stopping Sesh ({e})", err=True)
         raise click.Abort()
     except Exception as e:
-        click.echo(f"Error: An unexpected error occurred while stopping the Sesh ({e})", err=True)
+        click.echo(
+            f"Error: An unexpected error occurred while stopping the Sesh ({e})",
+            err=True,
+        )
         raise click.Abort()
